@@ -2,6 +2,10 @@
 
 HKBK College of Engineering (VTU) mini project, guided by Prof. Afreen Kubra.
 
+## Goal
+Estimate SOC (%) from free satellite data and give prediction intervals that stay
+reliable in districts the model has never seen.
+
 ## Data (1,640 unique locations, SOC in %)
 - SIS-India Bihar (CIMMYT): 1,347 locations, 2018-2020. https://hdl.handle.net/11529/10548646
   (no licence stated on the page; permission requested)
@@ -10,11 +14,42 @@ HKBK College of Engineering (VTU) mini project, guided by Prof. Afreen Kubra.
 
 Raw data files are not included.
 
+## Features
+Sentinel-2 (blue, green, red, nir, swir1, swir2, NDVI, BSI), Sentinel-1 (VV, VH),
+SRTM (elevation, slope), CHIRPS rainfall, ERA5-Land temperature. Extracted with Google Earth Engine.
+SoilGrids 2.0 is used as a comparison baseline only, not as a model feature.
+
 ## Files
 - data/soc_master.csv: cleaned points
 - data/soc_features.csv: points plus Sentinel-2, Sentinel-1, terrain, rainfall and temperature features
 - data/soc_split.csv: features plus a `split` column (bihar_trainval, bihar_test, akole_test, wosis_test)
-- notebooks/: cleaning, satellite extraction and split code
+- data/soc_split_sg.csv: the same plus SoilGrids values (baseline)
+- notebooks/: cleaning, satellite extraction, split and modelling code
+
+## Data split
+| Set | Points | Use |
+|---|---|---|
+| bihar_trainval | 1,082 (19 districts) | training, validation, calibration |
+| bihar_test | 265 (Madhubani, Banka, Bhojpur, Madhepura) | final test, used once |
+| akole_test | 165 | final test, used once |
+| wosis_test | 128 | final test, used once |
 
 ## Rules
 Train, tune and calibrate only on bihar_trainval. Keep the three test groups untouched until the final test.
+
+## Evaluation protocol (frozen before the final test)
+- Validation: leave-one-district-out. Random splits are not used, because they leak spatial information.
+- Main method: conformalized quantile regression (CQR) with district-blocked calibration
+  (25% of districts held out for calibration).
+- Baselines: random forest with split conformal, mean-only conformal, and SoilGrids 2.0.
+- Target coverage: 90% (alpha = 0.10). Fixed random seed 0.
+- Metrics: R2, RMSE, rank correlation, interval coverage, mean interval width, interval score.
+- The three test sets are used once, after all choices are fixed. No tuning on them.
+
+## Findings so far (validation only)
+- Satellite features give almost no skill in unseen districts (leave-district R2 about -0.05).
+- SoilGrids alone also has no skill here (rank correlation -0.04) and reads 2-4x higher than measured values.
+- Randomly calibrated intervals undercover. District-blocked calibration restores coverage near 90%.
+
+## Planned
+Sampling-budget experiment (random vs uncertainty-guided), uncertainty maps, final test, report.
