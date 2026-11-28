@@ -1,0 +1,10 @@
+test set,n,method,coverage,mean width,interval score
+bihar_test,265,mean (split conformal),0.849,0.465,0.79
+bihar_test,265,RF (split conformal),0.875,0.523,0.774
+bihar_test,265,CQR (blocked calib.),0.86,0.473,0.778
+akole_test,165,mean (split conformal),0.721,0.465,0.74
+akole_test,165,RF (split conformal),0.818,0.523,0.689
+akole_test,165,CQR (blocked calib.),0.733,0.522,0.787
+wosis_test,128,mean (split conformal),0.438,0.465,8.257
+wosis_test,128,RF (split conformal),0.492,0.523,7.692
+wosis_test,128,CQR (blocked calib.),0.469,0.508,7.917
